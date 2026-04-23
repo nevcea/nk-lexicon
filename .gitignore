@@ -1,0 +1,27 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Generated data files (pipeline output)
+data/processed/
+
+# Compiled Mecab binary dictionary
+*.dic
+
+# uv
+uv.lock
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Tool caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/

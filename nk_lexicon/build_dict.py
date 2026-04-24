@@ -57,8 +57,10 @@ def build_user_dict(terms: list[str]) -> list[tuple[str, ...]]:
     return [term_to_mecab_row(term) for term in terms]
 
 
-def save_user_dict_csv(rows: list[tuple[str, ...]], path: Path) -> None:
-    if path.exists():
+def save_user_dict_csv(
+    rows: list[tuple[str, ...]], path: Path, *, overwrite: bool = False
+) -> None:
+    if path.exists() and not overwrite:
         raise FileExistsError(f"출력 파일이 이미 존재합니다: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as f:

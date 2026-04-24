@@ -9,7 +9,10 @@ _ASCII_PUNCT = frozenset("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~")
 def load_raw_csv(path: Path) -> list[str]:
     with path.open(encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
-        return [row[_TERM_COLUMN] for row in reader]
+        try:
+            return [row[_TERM_COLUMN] for row in reader]
+        except KeyError:
+            raise ValueError(f"CSV에 '{_TERM_COLUMN}' 컬럼이 없습니다: {path}")
 
 
 def strip_term(term: str) -> str:
@@ -49,8 +52,8 @@ def deduplicate(terms: list[str]) -> list[str]:
     return result
 
 
-def save_clean_csv(terms: list[str], path: Path) -> None:
-    if path.exists():
+def save_clean_csv(terms: list[str], path: Path, *, overwrite: bool = False) -> None:
+    if path.exists() and not overwrite:
         raise FileExistsError(f"출력 파일이 이미 존재합니다: {path}")
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8-sig", newline="") as f:

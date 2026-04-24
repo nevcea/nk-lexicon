@@ -62,7 +62,7 @@ def test_load_raw_csv_file_not_found(tmp_path: Path) -> None:
 def test_load_raw_csv_missing_column(tmp_path: Path) -> None:
     csv_file = tmp_path / "bad.csv"
     csv_file.write_text("단어,설명\n조선,북한어\n", encoding="utf-8-sig")
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError, match="용어"):
         load_raw_csv(csv_file)
 
 
@@ -81,3 +81,12 @@ def test_save_clean_csv_raises_if_exists(tmp_path: Path) -> None:
     out.write_text("", encoding="utf-8")
     with pytest.raises(FileExistsError):
         save_clean_csv(["조선"], out)
+
+
+def test_save_clean_csv_overwrites_if_forced(tmp_path: Path) -> None:
+    out = tmp_path / "out.csv"
+    out.write_text("기존내용", encoding="utf-8")
+    save_clean_csv(["평양"], out, overwrite=True)
+    with out.open(encoding="utf-8-sig") as f:
+        rows = list(csv.reader(f))
+    assert rows[1] == ["평양"]

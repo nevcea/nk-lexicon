@@ -1,12 +1,11 @@
 """사용자 사전 적용 전/후 토큰화 결과 비교."""
 
+import os
 from pathlib import Path
 from typing import Any
 
-import MeCab  # type: ignore[import-not-found]
-
-_DIC_DIR = Path("/usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ko-dic")
-_RC_FILE = Path("/etc/mecabrc")
+_DEFAULT_DIC_DIR = "/usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ko-dic"
+_DEFAULT_RC_FILE = "/etc/mecabrc"
 
 _TEST_SENTENCES = [
     "협동농장에서 로동가요를 부르며 인민교원들이 모였다",
@@ -38,11 +37,22 @@ def _parse(tagger: Any, sentence: str) -> list[tuple[str, str]]:
 
 
 def run_validation(user_dic_path: Path) -> None:
+    try:
+        import MeCab  # type: ignore[import-not-found]  # noqa: PLC0415
+    except ModuleNotFoundError:
+        raise ModuleNotFoundError(
+            "MeCab Python 바인딩이 설치되지 않았습니다.\n"
+            "설치: sudo apt-get install -y mecab mecab-ipadic-utf8 libmecab-dev"
+            " && pip install mecab-python3"
+        ) from None
+
     if not user_dic_path.exists():
         raise FileNotFoundError(
             f"user.dic 없음: {user_dic_path}\n먼저 mecab-dict-index로 컴파일하세요."
         )
-    base_args = f"-r {_RC_FILE} -d {_DIC_DIR}"
+    dic_dir = Path(os.environ.get("MECAB_DIC_DIR", _DEFAULT_DIC_DIR))
+    rc_file = Path(os.environ.get("MECAB_RC_FILE", _DEFAULT_RC_FILE))
+    base_args = f"-r {rc_file} -d {dic_dir}"
     tagger_default = MeCab.Tagger(base_args)
     tagger_with_ud = MeCab.Tagger(f"{base_args} -u {user_dic_path}")
 

@@ -93,3 +93,14 @@ def test_save_user_dict_csv_raises_if_exists(tmp_path: Path) -> None:
     out.write_text("", encoding="utf-8")
     with pytest.raises(FileExistsError):
         save_user_dict_csv(build_user_dict(["조선"]), out)
+
+
+def test_save_user_dict_csv_overwrites_if_forced(tmp_path: Path) -> None:
+    out = tmp_path / "user.dic.csv"
+    out.write_text("기존내용", encoding="utf-8")
+    rows = build_user_dict(["평양"])
+    save_user_dict_csv(rows, out, overwrite=True)
+    with out.open(encoding="utf-8") as f:
+        written = list(csv.reader(f))
+    assert len(written) == 1
+    assert written[0][0] == "평양"
